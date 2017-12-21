@@ -1,0 +1,10 @@
+CPU OK
+Ethernet OK
+RAM OK
+RTC OK
+WIFI KO
+CPU OK
+Ethernet OK
+RAM OK
+RTC OK
+WIFI KO
