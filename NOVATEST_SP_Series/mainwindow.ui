@@ -20,7 +20,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>430</x>
       <y>380</y>
       <width>141</width>
       <height>21</height>
@@ -152,8 +152,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>380</y>
+      <x>310</x>
+      <y>490</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -375,7 +375,7 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>410</y>
+      <y>430</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -430,7 +430,7 @@
     <property name="geometry">
      <rect>
       <x>310</x>
-      <y>440</y>
+      <y>460</y>
       <width>141</width>
       <height>21</height>
      </rect>
@@ -618,6 +618,19 @@
     </property>
     <property name="text">
      <string>Run Test</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="PrimoCollaudo_checkBox">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>380</y>
+      <width>91</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PrimoCollaudo</string>
     </property>
    </widget>
   </widget>

@@ -711,7 +711,15 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
     }else{
         //errore!!
     }
-    generateParameters();
+
+    if(ui->PrimoCollaudo_checkBox->isChecked()){
+        ui->NextPort_pushButton->setEnabled(true);
+        //ui->GenerateParameters_PushButton->setEnabled(false);
+        ui->Write_EEprom_pushButton->setEnabled(false);
+    }else{
+        generateParameters();
+    }
+
 
 }
 
