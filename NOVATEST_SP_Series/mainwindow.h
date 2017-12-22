@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <string.h>
 #include <QMainWindow>
 #include <QNetworkInterface>
 #include <QSerialPort>
@@ -9,6 +10,7 @@
 #include <QMessageBox>
 #include <QSerialPortInfo>
 #include <QDate>
+#include <QApplication>
 #include <QPrinter>
 #include <QPainter>
 #include <QPrintDialog>
@@ -17,6 +19,7 @@
 
 
 #include "usrpswdialog.h"
+#include "dialogdatamatrix.h"
 
 #define MAXPORT 100
 
@@ -40,6 +43,7 @@ public:
     void superUser();
     void logInSuccesfully();
     QString getPsw();
+    QString getParameter();
 
 private slots:
     void savelastsetting();
@@ -101,6 +105,12 @@ private slots:
      void on_save_configuration_pushButton_clicked();
 
      void on_load_configuration_pushButton_clicked();
+
+     void on_NextPort_pushButton_clicked();
+
+     //void on_pushButton_clicked();
+
+     void on_readDataMatrix_clicked();
 
 private:
     Ui::MainWindow *ui;

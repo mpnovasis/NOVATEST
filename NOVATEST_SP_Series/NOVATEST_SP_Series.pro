@@ -15,14 +15,17 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    usrpswdialog.cpp
+    usrpswdialog.cpp \
+    dialogdatamatrix.cpp
 
 HEADERS  += mainwindow.h \
-    usrpswdialog.h
+    usrpswdialog.h \
+    dialogdatamatrix.h
 
 FORMS    += mainwindow.ui \
     usrpswdialog.ui \
-    usrpswdialog.ui
+    usrpswdialog.ui \
+    dialogdatamatrix.ui
 
 RESOURCES += \
     logo.qrc \

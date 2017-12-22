@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <unistd.h>
 
 bool superuser = false;
 int connectedNOVAsom=0;
@@ -11,8 +12,11 @@ QString ConfigDir = "C:/NOVATEST_SP/CONFIG/CONF";
 QString lan = "C:/NOVATEST_SP/CONFIG/xampp/htdocs/";
 QString LogDir = "C:/NOVATEST_SP/CONFIG/log/";
 QString MACdir = "C:/NOVATEST_SP/CONFIG/log/MAC/";
+QString Fail ="C:/NOVATEST_SP/CONFIG/log/FAIL/";
 QString directory = "C:/NOVATEST_SP/TESTED/";
 QString labeltemplate= "C:/NOVATEST_SP/CONFIG/CONF/zebra_template.txt";
+
+
 
 void clearstdstr( char *stringa){
     for(int i=0;i<strlen(stringa);i++){
@@ -35,12 +39,24 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->load_configuration_pushButton->hide();
 
     update_status_bar("Please LogIn...");
-    setWindowTitle("NOVAtest Ver. 1.0.0");
+    setWindowTitle("NOVAtest Ver. 1.1.0b");
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+QString MainWindow::getParameter(){
+    QString param;
+
+    param.append(ui->PN_lineEdit->text());
+    param.append("_");
+    param.append(ui->Lotto_lineEdit->text());
+    param.append("_");
+    param.append(ui->seriale_lineEdit->text());
+
+    return param;
 }
 
 int MainWindow::update_status_bar(QString StatusBarContent){
@@ -78,28 +94,31 @@ void MainWindow::superUser(){
 }
 
 void MainWindow::logInSuccesfully(){
-    qDebug() << "vaccagialla...";
     QList<QNetworkInterface> entries = QNetworkInterface::allInterfaces();
            for (int i=0;i<entries.count();i++){
                QNetworkInterface iface= entries.at(i);
                if(iface.flags().testFlag(QNetworkInterface::IsUp )){
                    for( int j =0 ; j< iface.addressEntries().count();j++){
-                       if(iface.addressEntries().at(j).ip().protocol()==QAbstractSocket::IPv4Protocol){
-                           if(iface.name()=="ethernet_8"){
-                           //if(iface.){
-                                ip = iface.addressEntries().at(j).ip().toString();
-                                qDebug() << iface.addressEntries().at(j).ip().toString();
-                                //ip = iface.addressEntries().at(j).ip().toString();
-                                qDebug() << "vaccagialla";
-                                qDebug() << ip;
-                                qDebug() << iface.addressEntries().at(j).ip().protocol();
+                       if(iface.addressEntries().at(j).ip().protocol()==QAbstractSocket::IPv4Protocol){                           
+                           if(strstr(iface.name().toUtf8(),"ethernet")){
+                               ip = iface.addressEntries().at(j).ip().toString();
+                               qDebug() << iface.addressEntries().at(j).ip().toString();
+                               qDebug() << iface.name();
+                               //ip = iface.addressEntries().at(j).ip().toString();
+                               qDebug() << "vaccagialla";
+                               qDebug() << ip;
+                               qDebug() << iface.addressEntries().at(j).ip().protocol();
                            }
+                           //if(iface.){
+
+                           //}
                        }
 
 
                }
             }
            }
+           if(ip==NULL) qDebug() << "NOINTERNETCONNECTION";
 
     popolate_line_combobox();
     if (loadpreviousconfiguration()==1){ //non ottimizzato secondo me!!
@@ -576,6 +595,16 @@ void MainWindow::on_runtest_pushButton_clicked()
     ui->disconnect_novasom_pushButton->setEnabled(false);
     ui->logout_pushButton->setEnabled(false);
 
+    QFile fl(lan + "WebServerResult.txt");
+    if(fl.exists()){
+        qDebug() << "esisteeeeeeeeeee222222";
+        while(fl.exists()){
+             qDebug() << "2222222esisteeeeeeeeeee222222";
+            fl.remove();
+        }
+        qDebug() << "remoooveeeeee2222222";
+    }
+
     QEventLoop loop;
 
     for (int i=0;i<connectedNOVAsom;i++){
@@ -600,6 +629,8 @@ void MainWindow::on_runtest_pushButton_clicked()
     ui->NextPort_pushButton->setEnabled(false);
     ui->Write_EEprom_pushButton->setEnabled(false);
     ui->disconnect_novasom_pushButton->setEnabled(true);
+    ui->readDataMatrix->setEnabled(false);
+    ui->Print_Label_pushButton->setEnabled(false);
 
 }
 
@@ -678,25 +709,62 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
     do{
         escape++;
         k=checkResult();
-        if(escape==15){
-            //nonho trovato la rete per 15 volte?? forse problema cpu?
+        if(escape==5){
+            //nonho trovato la rete per 5 volte?? forse problema cpu?
             QMessageBox err;
             err.setText("ERROR");
             err.setIcon(QMessageBox::Critical);
             err.setWindowTitle("ERROR");
             err.setInformativeText("NOVAsom unreacheble! Problem may be network or cpu...");
+            //lastupdate
+            serialport->write("\n\nreboot\n");
             err.exec();
+
             ui->GenerateParameters_PushButton->setEnabled(false);
             on_disconnect_novasom_pushButton_clicked();
             return;
         }
     }while(k==-2);
 
+    QByteArray tmp;
+    tmp.append("unix2dos report.txt ; ftpput --username novasis --password novasis ");
+    tmp.append(ip);
+    tmp.append(" report.txt \n\n ");
+
     if(k==0){
         //test pass
         update_status_bar("TEST PASS!!");
         ui->GenerateParameters_PushButton->setEnabled(false);
         ui->Write_EEprom_pushButton->setEnabled(true);
+        QMessageBox msgBox;
+
+        msgBox.setText("Do you want to generate parameters?");
+        msgBox.setInformativeText("??");
+        msgBox.setWindowTitle("??");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        int video = msgBox.exec();
+        QFile fl(lan + "report.txt");
+        switch(video){
+                case QMessageBox::Yes:
+
+                    if(fl.exists()){
+                        qDebug() << "esisteeeeeeeeeee";
+                        while(fl.exists()){
+                            fl.remove();
+                        }
+                        qDebug() << "remoooveeeeee";
+                    }
+                    serialport->write(tmp);
+                    generateParameters();
+                    break;
+                case QMessageBox::No:
+                    ui->NextPort_pushButton->setEnabled(true);
+                    ui->Write_EEprom_pushButton->setEnabled(false);
+                    break;
+                default:
+                    //should never be reached
+                    break;
+                }
 
     }else if(k==1){
         //test fail
@@ -704,22 +772,50 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
         ui->MAC_lineEdit->clear();
         ui->PN_lineEdit->clear();
         ui->Lotto_lineEdit->clear();
+        ui->seriale_lineEdit->clear();
         ui->GenerateParameters_PushButton->setEnabled(false);
         ui->NextPort_pushButton->setEnabled(true);
-        ui->Write_EEprom_pushButton->setEnabled(true);
+        ui->Write_EEprom_pushButton->setEnabled(false);
+        QString titolo;
+        char stdstr[20];
+        QByteArray line;
+        int error;
+        QFile fileerror(Fail+"error.txt");
+        if(fileerror.exists()){
+            fileerror.open(QIODevice::ReadWrite | QIODevice::Text);
+            line=fileerror.readAll();
+            error=atoi(line);
+            line.clear();
+
+        }else{
+
+            //crea file!!
+            error=-1;
+            line.clear();
+            //clearstdstr(stdstr);
+        }
+            fileerror.close();
+         error++;
+         titolo.clear();
+        itoa(error,stdstr,10);
+        titolo.append(stdstr);
+        clearstdstr(stdstr);
+
+
+        if(!fileerror.isOpen()){
+            fileerror.open(QIODevice::ReadWrite | QIODevice::Text);
+        }
+        itoa(error,stdstr,10);
+        fileerror.write(stdstr);
+        clearstdstr(stdstr);
+         fileerror.close();
 
     }else{
         //errore!!
     }
 
-    if(ui->PrimoCollaudo_checkBox->isChecked()){
-        ui->NextPort_pushButton->setEnabled(true);
-        //ui->GenerateParameters_PushButton->setEnabled(false);
-        ui->Write_EEprom_pushButton->setEnabled(false);
-    }else{
-        generateParameters();
-    }
 
+//adfgsghgfds//
 
 }
 
@@ -753,11 +849,14 @@ int MainWindow:: checkResult(){
                case QMessageBox::Yes:
                    ui->testpass_checkBox->setChecked(true);
                    ui->testFail_checkBox->setChecked(false);
+                   return 0;
                    break;
+
                case QMessageBox::No:
                    ui->testpass_checkBox->setChecked(false);
                    ui->testFail_checkBox->setChecked(true);
                    err.exec();
+                   return 1;
                    break;
                default:
                    //should never be reached
@@ -802,6 +901,7 @@ void MainWindow::generateParameters(){
 
     QString filename,pn,lotto;
     filename=(ConfigDir+"/PN.ini");
+    /*
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
     }else{
@@ -811,6 +911,8 @@ void MainWindow::generateParameters(){
         pn = getvalue(strKeyFunc, settings , ui->model_comboBox->currentText());
     }
     file.close();
+    */
+    pn=ui->model_comboBox->currentText();
     ui->PN_lineEdit->setText(pn);
     int week,year;
     char buffer[5];
@@ -823,11 +925,13 @@ void MainWindow::generateParameters(){
         }else{
             lotto.append("A");
         }
-        itoa(week,buffer,10);
-        lotto.append(buffer);
-        lotto.append("-");
+        year=year-2000;
         itoa(year,buffer,10);
         lotto.append(buffer);
+        itoa(week,buffer,10);
+        lotto.append(buffer);
+        //lotto.append("-");
+
         ui->Lotto_lineEdit->setText(lotto);
        }else{
         //non ho data!! sono fottuto!!
@@ -836,7 +940,7 @@ void MainWindow::generateParameters(){
         filename=LogDir+pn+"_"+lotto+".ini";
         QFile file2(filename);
         QByteArray riga;
-        char serialStr[7], buffer[7];
+        char serialStr[6], buffer[7];
         int seriale, len,i;
         if(file2.exists()){
             //continua con l'ultimo seriale;
@@ -847,11 +951,11 @@ void MainWindow::generateParameters(){
             seriale=seriale+1;
             itoa(seriale,serialStr,10);
             len=strlen(serialStr);
-            if(len<6){
-                for(i=0;i<6;i++){
+            if(len<5){
+                for(i=0;i<5;i++){
                     serialStr[i]='\0';
                 }
-                for(i=0;i<6-len;i++){
+                for(i=0;i<5-len;i++){
 
                     serialStr[i]='0';
                 }
@@ -863,7 +967,7 @@ void MainWindow::generateParameters(){
             file2.close();
         }else{
             //crea file e ricomincia seriale
-            strcpy(serialStr,"000000");
+            strcpy(serialStr,"00001");
             file2.open(QIODevice::WriteOnly | QIODevice::Text);
             file2.write(serialStr);
             file2.close();
@@ -1017,59 +1121,91 @@ void MainWindow::generateParameters(){
 
 void MainWindow::on_Write_EEprom_pushButton_clicked()
 {
-    if(ui->line_comboBox->currentText()=="P-Line"){
-        QString pn,mac,lotto,seriale;
-        serialport->write("get_exec e2info\n");
+    if(ui->testpass_checkBox->isChecked()){
+        if(ui->line_comboBox->currentText()=="P-Line"){
+            QString pn,mac,lotto,seriale;
+            serialport->write("get_exec e2info\n");
 
-        pn=ui->PN_lineEdit->text();
-        qDebug() << pn.toUtf8();
-        seriale=ui->seriale_lineEdit->text();
-        qDebug() << seriale.toUtf8();
-        lotto=ui->Lotto_lineEdit->text();
-        qDebug() << lotto.toUtf8();
-        mac=ui->MAC_lineEdit->text();
-        qDebug() << mac.toUtf8();
+            pn=ui->PN_lineEdit->text();
+            qDebug() << pn.toUtf8();
+            seriale=ui->seriale_lineEdit->text();
+            qDebug() << seriale.toUtf8();
+            lotto=ui->Lotto_lineEdit->text();
+            qDebug() << lotto.toUtf8();
+            mac=ui->MAC_lineEdit->text();
+            qDebug() << mac.toUtf8();
+            serialport->write("chmod 777 e2info\n");
+            serialport->write("./e2info -P "+ pn.toUtf8()+"\n");
+            serialport->write("./e2info -M "+ mac.toUtf8()+"\n");
+            serialport->write("./e2info -S "+ seriale.toUtf8()+"\n");
+            serialport->write("./e2info -L "+ lotto.toUtf8()+"\n");
+        }
+        QString titolo;
+
+        titolo.append(ui->PN_lineEdit->text());
+        titolo.append("_");
+        titolo.append(ui->seriale_lineEdit->text());
+        titolo.append("_");
+        titolo.append(ui->Lotto_lineEdit->text());
+        generateReport(titolo);
+
+        ui->NextPort_pushButton->setEnabled(true);
+        ui->Write_EEprom_pushButton->setEnabled(false);
+        ui->Print_Label_pushButton->setEnabled(true);
 
 
-        //pn=ui->PN_textBrowser->text
-        serialport->write("chmod 777 e2info\n");
+    }else{
+        //se il test è fallito??//i
+        /*
+        QString titolo;
+        char stdstr[20];
+        QByteArray line;
+        int error;
+        QFile fileerror(Fail+"error.txt");
+        if(fileerror.exists()){
+            fileerror.open(QIODevice::ReadWrite | QIODevice::Text);
+            line=fileerror.readAll();
+            error=atoi(line);
+            line.clear();
 
-        serialport->write("./e2info -P "+ pn.toUtf8()+"\n");
-        serialport->write("./e2info -M "+ mac.toUtf8()+"\n");
-        serialport->write("./e2info -S "+ seriale.toUtf8()+"\n");
-        serialport->write("./e2info -L "+ lotto.toUtf8()+"\n");
-        //serialport->write("unix2dos report.txt ; ftpput --username novasis --password novasis 192.168.0.83 report.txt \n\n");
-        QByteArray tmp;
-        tmp.append("unix2dos report.txt ; ftpput --username novasis --password novasis ");
-        tmp.append(ip);
-        tmp.append(" report.txt \n\n ");
-        serialport->write(tmp);
+        }else{
 
-        qDebug() << "ci siamo!!!";
+            //crea file!!
+            error=-1;
+            line.clear();
+            //clearstdstr(stdstr);
+        }
+            fileerror.close();
+         error++;
+         titolo.clear();
+        itoa(error,stdstr,10);
+        titolo.append(stdstr);
+        clearstdstr(stdstr);
 
 
+        if(!fileerror.isOpen()){
+            fileerror.open(QIODevice::ReadWrite | QIODevice::Text);
+        }
+        itoa(error,stdstr,10);
+        fileerror.write(stdstr);
+        clearstdstr(stdstr);
+        generateReport(titolo);
+        */
 
+        ui->NextPort_pushButton->setEnabled(true);
+        ui->Write_EEprom_pushButton->setEnabled(false);
+        ui->Print_Label_pushButton->setEnabled(false);
 
     }
-    QString titolo;
 
-    titolo.append(ui->PN_lineEdit->text());
-    titolo.append("_");
-    titolo.append(ui->seriale_lineEdit->text());
-    titolo.append("_");
-    titolo.append(ui->Lotto_lineEdit->text());
-    generateReport(titolo);
-
-    ui->NextPort_pushButton->setEnabled(true);
-    ui->Write_EEprom_pushButton->setEnabled(false);
-    ui->Print_Label_pushButton->setEnabled(true);
-
+    ui->readDataMatrix->setEnabled(true);
 }
 
 int MainWindow::generateReport(QString filename){
 
 
     QFile report(directory+filename+".txt");
+    qDebug()<< filename;
 
     if(!report.open(QIODevice::ReadWrite|QIODevice::Text)){
        qDebug() << "Non sono riuscito a creare il file1!";
@@ -1078,6 +1214,8 @@ int MainWindow::generateReport(QString filename){
 
 
     QFile original(lan + "report.txt");
+
+
     if(!original.open(QIODevice::ReadOnly|QIODevice::Text)){
        qDebug() << "Non sono riuscito ad aprire il file2!";
        return -1;
@@ -1085,6 +1223,7 @@ int MainWindow::generateReport(QString filename){
     QByteArray rep;
 
     rep=original.readAll();
+    qDebug() << rep;
 
     report.write("#");
     report.write(filename.toUtf8());
@@ -1170,6 +1309,7 @@ void MainWindow::on_Print_Label_pushButton_clicked()
     titolo.append("label.txt");
 
     generateLabel(titolo);
+    sleep(1);
     printLabel(titolo);
 
     ui->Print_Label_pushButton->setEnabled(false);
@@ -1180,6 +1320,7 @@ int MainWindow::generateLabel(QString filename){
 
     QFile source(labeltemplate);
     QFile destination(directory+filename);
+    QFile destination1(directory+"last_label.txt");
     int len;
 
 
@@ -1245,40 +1386,23 @@ int MainWindow::generateLabel(QString filename){
         return -1;
     }else{
     }
+    if (!destination1.open(QIODevice::ReadWrite | QIODevice::Text)){
+        update_status_bar("Impossibile generare etichetta2!Contatta gestore sw!");
+        return -1;
+    }else{
+
+    }
 
     destination.write(text);
     destination.close();
+    destination1.write(text);
+    destination1.close();
     return 0;
 }
 
 int MainWindow::printLabel(QString filename)
 {
-
-    QFile label(directory+filename);
-
-    if (!label.open(QIODevice::ReadOnly | QIODevice::Text)){
-        update_status_bar("Impossibile generare etichetta2!Contatta gestore sw!");
-        return -1;
-    }else{
-    }
-
-    QByteArray text;
-    text=label.readAll();
-
-    QPrinter printer;
-
-    QPrintDialog *dialog = new QPrintDialog(&printer);
-    dialog->setWindowTitle("Print Document");
-
-    if (dialog->exec() != QDialog::Accepted)
-        return -1;
-
-    QPainter painter;
-    painter.begin(&printer);
-
-    painter.drawText(100, 100, 500, 500, Qt::AlignLeft|Qt::AlignTop, text);
-
-    painter.end();
+    system("notepad \/p \/NOVATEST_SP\/TESTED\/last_label.txt");
 
     return 0;
 }
@@ -1582,4 +1706,23 @@ void MainWindow::on_save_configuration_pushButton_clicked()
             out << QString("wifi_checkBox=false\r\n");
         file.close();
     }
+}
+
+void MainWindow::on_NextPort_pushButton_clicked()
+{
+    ui->Print_Label_pushButton->setEnabled(false);
+    //ui->readDataMatrix->setEnabled(false);
+    ui->readDataMatrix->setDisabled(true);
+}
+
+
+
+void MainWindow::on_readDataMatrix_clicked()
+{
+    DialogDataMatrix *d = new DialogDataMatrix(this);
+    d->show();
+    ui->readDataMatrix->setEnabled(false);
+
+    //UsrPswDialog *p = new UsrPswDialog(this);
+    //p->show();
 }
