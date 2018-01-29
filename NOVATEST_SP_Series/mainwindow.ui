@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -20,14 +23,14 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>450</x>
       <y>370</y>
       <width>141</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Generate Parameters</string>
+     <string>Read Result</string>
     </property>
    </widget>
    <widget class="QWidget" name="horizontalLayoutWidget_4">
@@ -152,7 +155,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>450</x>
       <y>490</y>
       <width>141</width>
       <height>21</height>
@@ -374,7 +377,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>450</x>
       <y>400</y>
       <width>141</width>
       <height>21</height>
@@ -429,7 +432,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>450</x>
       <y>460</y>
       <width>141</width>
       <height>21</height>
@@ -626,7 +629,7 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>450</x>
       <y>430</y>
       <width>141</width>
       <height>21</height>
@@ -634,6 +637,22 @@
     </property>
     <property name="text">
      <string>Read Data Matrix</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="GenerateParameters_checkBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>370</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Generate Parameters</string>
     </property>
    </widget>
   </widget>

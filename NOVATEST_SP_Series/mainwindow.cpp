@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->load_configuration_pushButton->hide();
 
     update_status_bar("Please LogIn...");
-    setWindowTitle("NOVAtest Ver. 1.1.0b");
+    setWindowTitle("NOVAtest Ver. 1.2.0");
 }
 
 MainWindow::~MainWindow()
@@ -612,6 +612,7 @@ void MainWindow::on_runtest_pushButton_clicked()
             connect(ui->NextPort_pushButton,&QPushButton::pressed,&loop,&QEventLoop::quit);
             serialport=&serial[i];
             testingNovasom(serialport);
+            ui->GenerateParameters_checkBox->setEnabled(true);
             ui->GenerateParameters_PushButton->setEnabled(true);
             ui->NextPort_pushButton->setEnabled(false);
             loop.exec();
@@ -626,6 +627,7 @@ void MainWindow::on_runtest_pushButton_clicked()
         msgBox.exec();
 
     ui->GenerateParameters_PushButton->setEnabled(false);
+    ui->GenerateParameters_checkBox->setEnabled(false);
     ui->NextPort_pushButton->setEnabled(false);
     ui->Write_EEprom_pushButton->setEnabled(false);
     ui->disconnect_novasom_pushButton->setEnabled(true);
@@ -721,6 +723,7 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
             err.exec();
 
             ui->GenerateParameters_PushButton->setEnabled(false);
+            ui->GenerateParameters_checkBox->setEnabled(false);
             on_disconnect_novasom_pushButton_clicked();
             return;
         }
@@ -735,7 +738,30 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
         //test pass
         update_status_bar("TEST PASS!!");
         ui->GenerateParameters_PushButton->setEnabled(false);
+        ui->GenerateParameters_checkBox->setEnabled(false);
         ui->Write_EEprom_pushButton->setEnabled(true);
+
+        QFile fl(lan + "report.txt");
+
+        if(ui->GenerateParameters_checkBox->isChecked()){
+            //genera parametri!
+            if(fl.exists()){
+                qDebug() << "esisteeeeeeeeeee";
+                while(fl.exists()){
+                    fl.remove();
+                }
+                qDebug() << "remoooveeeeee";
+            }
+            serialport->write(tmp);
+            generateParameters();
+        }else{
+            //non generare parametri!
+            ui->NextPort_pushButton->setEnabled(true);
+            ui->Write_EEprom_pushButton->setEnabled(false);
+
+        }
+
+        /*
         QMessageBox msgBox;
 
         msgBox.setText("Do you want to generate parameters?");
@@ -765,6 +791,7 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
                     //should never be reached
                     break;
                 }
+                */
 
     }else if(k==1){
         //test fail
@@ -774,6 +801,7 @@ void MainWindow::on_GenerateParameters_PushButton_clicked()
         ui->Lotto_lineEdit->clear();
         ui->seriale_lineEdit->clear();
         ui->GenerateParameters_PushButton->setEnabled(false);
+        ui->GenerateParameters_checkBox->setEnabled(false);
         ui->NextPort_pushButton->setEnabled(true);
         ui->Write_EEprom_pushButton->setEnabled(false);
         QString titolo;
@@ -928,6 +956,9 @@ void MainWindow::generateParameters(){
         year=year-2000;
         itoa(year,buffer,10);
         lotto.append(buffer);
+        if(week<10){
+            lotto.append("0");
+        }
         itoa(week,buffer,10);
         lotto.append(buffer);
         //lotto.append("-");

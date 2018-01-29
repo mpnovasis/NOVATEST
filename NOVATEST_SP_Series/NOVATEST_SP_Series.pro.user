@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.1, 2017-11-13T17:48:08. -->
+<!-- Written by QtCreator 4.2.1, 2018-01-29T11:27:11. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
-  <value type="QByteArray">{35f946cd-39f9-4572-9d54-268a8297d808}</value>
+  <value type="QByteArray">{2b7c1f31-0685-439a-943b-8ebac625d4b4}</value>
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -285,8 +285,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">NOVATEST_SP_Series</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/m.puca/Documents/GitHub/NOVATEST_SP_Series/NOVATEST_SP_Series.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">NOVATEST_SP_Series2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/user/Documents/GitHub/NOVATEST_SP_Series/NOVATEST_SP_Series.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">NOVATEST_SP_Series.pro</value>

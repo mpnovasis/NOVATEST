@@ -1,10 +1,23 @@
-CPU OK
-Ethernet OK
-RAM OK
-RTC OK
-WIFI KO
-CPU OK
-Ethernet OK
-RAM OK
-RTC OK
-WIFI KO
+Starting Tests
+System Information:
+ hardware:	armv7l
+Board : NI240613-FS05 GDS Module
+OS:	GNU/Linux
+Checking CPU...
+CPU OK, 4 core(s).
+Checking RAM
+RAM OK. Disponibile : 1029344kB
+Checking RTC...
+ rtc-pcf8563 2018-01-29 09:23:31 UTC
+Checking USB...
+USB Ok
+Checking Ethernet...
+Ethernet found
+Checking eMMC...
+Formatting data...
+Complete.
+Checking LVDS...
+fb-test 1.1.0 (rosetta)
+fb res 1920x1080 virtual 1920x1080, line_len 3840, bpp 16
+
+		Test Done, board OK
